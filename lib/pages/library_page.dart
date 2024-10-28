@@ -1,6 +1,6 @@
 import 'package:bookthief/models/playlist_provider.dart';
 import 'package:bookthief/models/song.dart';
-import 'package:bookthief/pages/home_page.dart';
+import 'package:bookthief/pages/song_page.dart';
 import 'package:flutter/material.dart';
 
 import "package:bookthief/components/my_drawer.dart";
@@ -25,7 +25,7 @@ class _LibraryPageState extends State<LibraryPage> {
   void goToSong(int songIndex) {
     playlistProvider.currentSongIndex = songIndex;
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const HomePage()));
+        context, MaterialPageRoute(builder: (context) => const SongPage()));
   }
 
   @override
