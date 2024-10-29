@@ -1,4 +1,5 @@
 import 'package:bookthief/components/position_picker.dart';
+import 'package:bookthief/components/song_details.dart';
 import 'package:bookthief/models/playlist_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +14,8 @@ class SongPage extends StatefulWidget {
 
 class _SongPageState extends State<SongPage> {
   late final dynamic playlistProvider;
-  bool isPlaying = true;
+
+  bool isPlaying = false;
   int hour = 0;
   int minute = 0;
 
@@ -53,9 +55,7 @@ class _SongPageState extends State<SongPage> {
         body: Center(
           child: Column(
             children: [
-              const SizedBox(
-                height: 80,
-              ),
+              const Spacer(),
               Container(
                 height: 300,
                 width: 300,
@@ -74,7 +74,9 @@ class _SongPageState extends State<SongPage> {
                 child: IconButton(
                   onPressed: () async {
                     await HapticFeedback.lightImpact();
-                    setState(() => isPlaying = !isPlaying);
+                    setState(() {
+                      isPlaying = !isPlaying;
+                    });
                   },
                   icon: Icon(
                     isPlaying ? Icons.pause_outlined : Icons.play_arrow_rounded,
@@ -83,61 +85,61 @@ class _SongPageState extends State<SongPage> {
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 40,
+              const Spacer(),
+              SongDetails(
+                songName: value.currentSong.songName,
+                artistName: value.currentSong.artistName,
               ),
-              Text(
-                value.currentSong.songName.toUpperCase(),
-                style: const TextStyle(fontSize: 20),
-              ),
-              Text(value.currentSong.artistName),
-              const SizedBox(
-                height: 40,
-              ),
-              isPlaying
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 100,
-                          height: 100,
-                          alignment: Alignment.center,
-                          child: Text(
-                            hour.toString(),
-                            style: const TextStyle(
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+              const Spacer(),
+              // const SizedBox(
+              //   height: 30,
+              // ),
+              if (isPlaying)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      alignment: Alignment.center,
+                      child: Text(
+                        hour.toString(),
+                        style: const TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
                         ),
-                        Container(
-                          alignment: Alignment.center,
-                          child: const Text(
-                            " : ",
-                            style: TextStyle(fontSize: 40),
-                          ),
-                        ),
-                        Container(
-                          width: 100,
-                          height: 100,
-                          alignment: Alignment.center,
-                          child: Text(
-                            minute.toString(),
-                            style: const TextStyle(
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  : PositionPicker(
-                      hour: hour,
-                      minute: minute,
-                      onChangeHour: (value) => setState(() => hour = value),
-                      onChangeMin: (value) => setState(() => minute = value),
+                      ),
                     ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: const Text(
+                        " : ",
+                        style: TextStyle(fontSize: 40),
+                      ),
+                    ),
+                    Container(
+                      width: 100,
+                      height: 100,
+                      alignment: Alignment.center,
+                      child: Text(
+                        minute.toString(),
+                        style: const TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              if (!isPlaying)
+                PositionPicker(
+                  hour: hour,
+                  minute: minute,
+                  onChangeHour: (value) => setState(() => hour = value),
+                  onChangeMin: (value) => setState(() => minute = value),
+                ),
+              const Spacer(),
             ],
           ),
         ),

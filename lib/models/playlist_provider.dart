@@ -4,20 +4,29 @@ import 'package:flutter/material.dart';
 class PlaylistProvider extends ChangeNotifier {
   final List<Song> _playlist = [
     Song(
-        songName: "Nokia",
-        artistName: "Nokia",
-        albumArtImagePath: "",
-        audioPath: "assets/nokia.mp3"),
+      songName: "FE!N",
+      artistName: "Travis Scott",
+      albumArtImagePath: "",
+      audioPath: "assets/nokia.mp3",
+    ),
     Song(
-        songName: "Samsung",
-        artistName: "Samsung",
-        albumArtImagePath: "",
-        audioPath: "assets/samsung.mp3"),
+      songName: "Hallelujah",
+      artistName: "Jeff Buckley",
+      albumArtImagePath: "",
+      audioPath: "assets/samsung.mp3",
+    ),
     Song(
-        songName: "Iphone",
-        artistName: "Iphone",
-        albumArtImagePath: "",
-        audioPath: "assets/iphone.mp3"),
+      songName: "Evergreen",
+      artistName: "Ritcy Mitch & The Coal Miners",
+      albumArtImagePath: "",
+      audioPath: "assets/iphone.mp3",
+    ),
+    Song(
+      songName: "Kafka on the Shore (Fiction) 2020",
+      artistName: "Haruki Murakami",
+      albumArtImagePath: "",
+      audioPath: "assets/iphone.mp3",
+    ),
   ];
 
   int _currentPlaying = 0;
