@@ -1,5 +1,5 @@
+import 'package:bookthief/components/position_picker.dart';
 import 'package:bookthief/models/playlist_provider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +13,9 @@ class SongPage extends StatefulWidget {
 
 class _SongPageState extends State<SongPage> {
   late final dynamic playlistProvider;
-  dynamic isPlaying = true;
+  bool isPlaying = true;
+  int hour = 0;
+  int minute = 0;
 
   @override
   void initState() {
@@ -38,7 +40,7 @@ class _SongPageState extends State<SongPage> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back_rounded),
           ),
-          title: Text(
+          title: const Text(
             "N O W  P L A Y I N G",
           ),
           actions: [
@@ -69,10 +71,16 @@ class _SongPageState extends State<SongPage> {
                     ],
                   ),
                 ),
-                child: Icon(
-                  Icons.pause_outlined,
-                  color: Colors.white,
-                  size: 100,
+                child: IconButton(
+                  onPressed: () async {
+                    await HapticFeedback.lightImpact();
+                    setState(() => isPlaying = !isPlaying);
+                  },
+                  icon: Icon(
+                    isPlaying ? Icons.pause_outlined : Icons.play_arrow_rounded,
+                    color: Colors.white,
+                    size: 100,
+                  ),
                 ),
               ),
               const SizedBox(
@@ -80,73 +88,56 @@ class _SongPageState extends State<SongPage> {
               ),
               Text(
                 value.currentSong.songName.toUpperCase(),
-                style: TextStyle(fontSize: 20),
+                style: const TextStyle(fontSize: 20),
               ),
               Text(value.currentSong.artistName),
               const SizedBox(
                 height: 40,
               ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.arrow_right_rounded,
-                    size: 40,
-                  ),
-                  SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: CupertinoPicker(
-                      itemExtent: 40,
-                      onSelectedItemChanged: (selectedValue) async {
-                        await HapticFeedback.selectionClick();
-                      },
-                      children: List.generate(
-                        30,
-                        (index) => Text(
-                          '$index',
-                          style: TextStyle(
-                              fontSize: 40, fontWeight: FontWeight.bold),
+              isPlaying
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 100,
+                          height: 100,
+                          alignment: Alignment.center,
+                          child: Text(
+                            hour.toString(),
+                            style: const TextStyle(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      ),
-                      looping: true,
-                      squeeze: 1,
-                      magnification: 1.2,
-                    ),
-                  ),
-                  Text(
-                    " : ",
-                    style: TextStyle(fontSize: 40),
-                  ),
-                  SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: CupertinoPicker(
-                      itemExtent: 40,
-                      onSelectedItemChanged: (selectedValue) async {
-                        await HapticFeedback.selectionClick();
-                      },
-                      children: List.generate(
-                        30,
-                        (index) => Text(
-                          '$index',
-                          style: TextStyle(
-                              fontSize: 40, fontWeight: FontWeight.bold),
+                        Container(
+                          alignment: Alignment.center,
+                          child: const Text(
+                            " : ",
+                            style: TextStyle(fontSize: 40),
+                          ),
                         ),
-                      ),
-                      looping: true,
-                      squeeze: 1,
-                      magnification: 1.2,
+                        Container(
+                          width: 100,
+                          height: 100,
+                          alignment: Alignment.center,
+                          child: Text(
+                            minute.toString(),
+                            style: const TextStyle(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  : PositionPicker(
+                      hour: hour,
+                      minute: minute,
+                      onChangeHour: (value) => setState(() => hour = value),
+                      onChangeMin: (value) => setState(() => minute = value),
                     ),
-                  ),
-                ],
-              )
-              // Container(
-              //   child: Icon(Icons.pause_outlined,
-              //       color: Theme.of(context).colorScheme.inversePrimary,
-              //       size: 100),
-              // )
             ],
           ),
         ),
