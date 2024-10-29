@@ -27,7 +27,7 @@ class PositionPicker extends StatelessWidget {
             itemExtent: 40,
             onSelectedItemChanged: (value) async {
               onChangeHour(value);
-              await HapticFeedback.selectionClick();
+              await HapticFeedback.lightImpact();
             },
             looping: true,
             squeeze: 1,
