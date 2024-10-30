@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:audiotags/audiotags.dart';
 import 'package:bookthief/models/song.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +18,9 @@ class PlaylistProvider extends ChangeNotifier {
   Song get currentSong => _playlist[_currentPlaying];
 
   setCurrentPlayingIndex(int songIndex) async {
+    if (songIndex == _currentPlaying) return;
     _currentPlaying = songIndex;
+    _isPLaying = false;
     await player.setSource(DeviceFileSource(_paths[songIndex]));
     notifyListeners();
   }
@@ -42,23 +45,29 @@ class PlaylistProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setPaths(List<String> paths) {
+  Future<Song> getSongFromPath(String path) async {
+    Tag? tag = await AudioTags.read(path);
+    return Song(
+      songName: tag?.title ?? path.split('/').last,
+      albumArtImagePath: "",
+      artistName: tag?.trackArtist ?? "Unknown Artist",
+      audioPath: path,
+    );
+  }
+
+  setPaths(List<String> paths) async {
     _paths = paths;
-    _playlist = paths
-        .map(
-          (path) => Song(
-              songName: path.split("/").last,
-              albumArtImagePath: "",
-              artistName: path.split("/").last,
-              audioPath: path),
-        )
-        .toList();
+    _playlist = [];
+    for (final String path in paths) {
+      _playlist.add(await getSongFromPath(path));
+    }
     notifyListeners();
   }
 
-  addPath(String path) {
+  addPath(String path) async {
     if (_paths.contains(path)) return;
     _paths.add(path);
-    setPaths(_paths);
+    _playlist.add(await getSongFromPath(path));
+    notifyListeners();
   }
 }
