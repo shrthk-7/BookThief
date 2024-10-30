@@ -67,7 +67,7 @@ class PositionPicker extends StatelessWidget {
             children: List.generate(
               30,
               (index) => Text(
-                '$index',
+                index < 10 ? '0$index' : '$index',
                 style: const TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,

@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'pages/home_page.dart';
 
 void main() {
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => ThemeProvider()),
     ChangeNotifierProvider(create: (context) => PlaylistProvider())
