@@ -2,41 +2,50 @@ import 'package:bookthief/models/song.dart';
 import 'package:flutter/material.dart';
 
 class PlaylistProvider extends ChangeNotifier {
-  final List<Song> _playlist = [
-    Song(
-      songName: "FE!N",
-      artistName: "Travis Scott",
-      albumArtImagePath: "",
-      audioPath: "assets/nokia.mp3",
-    ),
-    Song(
-      songName: "Hallelujah",
-      artistName: "Jeff Buckley",
-      albumArtImagePath: "",
-      audioPath: "assets/samsung.mp3",
-    ),
-    Song(
-      songName: "Evergreen",
-      artistName: "Ritcy Mitch & The Coal Miners",
-      albumArtImagePath: "",
-      audioPath: "assets/iphone.mp3",
-    ),
-    Song(
-      songName: "Kafka on the Shore (Fiction) 2020",
-      artistName: "Haruki Murakami",
-      albumArtImagePath: "",
-      audioPath: "assets/iphone.mp3",
-    ),
-  ];
+  List<String> _paths = [];
+  List<Song> _playlist = [];
 
   int _currentPlaying = 0;
+  bool _isPLaying = false;
 
   List<Song> get playlist => _playlist;
+  List<String> get paths => _paths;
   int get currentSongIndex => _currentPlaying;
+  bool get isPlaying => _isPLaying;
   Song get currentSong => _playlist[_currentPlaying];
 
   set currentSongIndex(int songIndex) {
     _currentPlaying = songIndex;
     notifyListeners();
+  }
+
+  pauseSong() {
+    _isPLaying = false;
+    notifyListeners();
+  }
+
+  playSong() {
+    _isPLaying = true;
+    notifyListeners();
+  }
+
+  setPaths(List<String> paths) {
+    _paths = paths;
+    _playlist = paths
+        .map(
+          (path) => Song(
+              songName: path.split("/").last,
+              albumArtImagePath: "",
+              artistName: path.split("/").last,
+              audioPath: path),
+        )
+        .toList();
+    notifyListeners();
+  }
+
+  addPath(String path) {
+    if (_paths.contains(path)) return;
+    _paths.add(path);
+    setPaths(_paths);
   }
 }

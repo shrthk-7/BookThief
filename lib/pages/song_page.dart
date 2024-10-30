@@ -35,21 +35,22 @@ class _SongPageState extends State<SongPage> {
     return Consumer<PlaylistProvider>(
       builder: (context, value, child) => Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        // appBar: AppBar(
-        //   backgroundColor: Theme.of(context).colorScheme.surface,
-        //   foregroundColor: Colors.white,
-        //   leading: IconButton(
-        //     onPressed: () => Navigator.pop(context),
-        //     icon: Icon(Icons.arrow_back_rounded,
-        //         color: Theme.of(context).colorScheme.inversePrimary),
-        //   ),
-        //   actions: [
-        //     IconButton(
-        //       onPressed: () => Navigator.pop(context),
-        //       icon: const Icon(Icons.menu_rounded),
-        //     )
-        //   ],
-        // ),
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.tertiary,
+          foregroundColor: Colors.white,
+          title: const Text("NOW PLAYING"),
+          leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Icon(Icons.arrow_back_rounded,
+                color: Theme.of(context).colorScheme.inversePrimary),
+          ),
+          actions: [
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.menu_rounded),
+            )
+          ],
+        ),
         body: Center(
           child: Column(
             children: [

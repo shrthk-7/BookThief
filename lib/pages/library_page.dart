@@ -1,12 +1,12 @@
 import 'dart:math';
-
 import 'package:bookthief/models/playlist_provider.dart';
 import 'package:bookthief/models/song.dart';
 import 'package:bookthief/pages/song_page.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-
 import "package:bookthief/components/my_drawer.dart";
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -17,6 +17,31 @@ class LibraryPage extends StatefulWidget {
 
 class _LibraryPageState extends State<LibraryPage> {
   late final dynamic playlistProvider;
+
+  Future<void> _pickAndSaveAudioFiles() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.audio,
+      allowMultiple: true,
+    );
+
+    if (result == null) return;
+
+    List<String> audioFilePaths =
+        result.files.map((file) => file.path!).toList();
+
+    for (final String path in audioFilePaths) {
+      playlistProvider.addPath(path);
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('audioFilePaths', playlistProvider.paths);
+  }
+
+  Future<void> _loadAudioFilePaths() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedPaths = prefs.getStringList('audioFilePaths') ?? [];
+    playlistProvider.setPaths(savedPaths);
+  }
 
   final List<Color> colors = const [
     Color(0xFF012a4a),
@@ -42,6 +67,7 @@ class _LibraryPageState extends State<LibraryPage> {
   void initState() {
     super.initState();
     playlistProvider = Provider.of<PlaylistProvider>(context, listen: false);
+    _loadAudioFilePaths();
   }
 
   void goToSong(int songIndex) {
@@ -53,105 +79,90 @@ class _LibraryPageState extends State<LibraryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        appBar: AppBar(title: const Text("L I B R A R Y")),
-        drawer: const MyDrawer(),
-        body: Consumer<PlaylistProvider>(
-          builder: (context, value, child) {
-            final List<Song> playlist = value.playlist;
-            return GridView.builder(
-              padding: const EdgeInsets.all(20),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-                childAspectRatio: 0.8,
-              ),
-              itemCount: value.playlist.length,
-              itemBuilder: (context, index) {
-                final Song song = playlist[index];
-                return InkWell(
-                  onTap: () => goToSong(index),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomLeft,
-                        end: Alignment.topRight,
-                        colors: getRandomColors(),
-                      ),
-                      borderRadius: BorderRadius.circular(15),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(title: const Text("L I B R A R Y")),
+      drawer: const MyDrawer(),
+      floatingActionButton: Container(
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.tertiary,
+          shape: BoxShape.circle,
+        ),
+        child: IconButton(
+          onPressed: _pickAndSaveAudioFiles,
+          icon: Icon(Icons.download_rounded),
+          color: Colors.white,
+        ),
+      ),
+      body: Consumer<PlaylistProvider>(
+        builder: (context, value, child) {
+          final List<Song> playlist = value.playlist;
+
+          return GridView.builder(
+            padding: const EdgeInsets.all(20),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+              childAspectRatio: 0.8,
+            ),
+            itemCount: playlist.length,
+            itemBuilder: (context, index) {
+              final Song song = playlist[index];
+              return InkWell(
+                onTap: () => goToSong(index),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: getRandomColors(),
                     ),
-                    child: Column(
-                      children: [
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.only(
-                            left: 20,
-                            right: 20,
-                          ),
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            song.songName,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.only(
-                            left: 20,
-                            bottom: 10,
-                            right: 20,
-                          ),
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            song.artistName,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              color: Colors.white,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                );
-                // return Padding(
-                //   padding: const EdgeInsets.only(left: 10, bottom: 10),
-                //   child: ListTile(
-                //     title: Text(song.songName),
-                //     subtitle: Text(song.artistName),
-                //     onTap: () => goToSong(index),
-                //     leading: const Icon(
-                //       Icons.library_music_rounded,
-                //       size: 40,
-                //     ),
-                //   ),
-                // );
-              },
-            );
-            // return ListView.builder(
-            //     itemCount: playlist.length,
-            //     itemBuilder: (context, index) {
-            //       final Song song = playlist[index];
-            //       return Padding(
-            //         padding: const EdgeInsets.only(left: 10, bottom: 10),
-            //         child: ListTile(
-            //           title: Text(song.songName),
-            //           subtitle: Text(song.artistName),
-            //           onTap: () => goToSong(index),
-            //           leading: const Icon(
-            //             Icons.library_music_rounded,
-            //             size: 40,
-            //           ),
-            //         ),
-            //       );
-            //     });
-          },
-        ));
+                  child: Column(
+                    children: [
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.only(
+                          left: 20,
+                          right: 20,
+                        ),
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          song.songName,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(
+                          left: 20,
+                          bottom: 10,
+                          right: 20,
+                        ),
+                        alignment: Alignment.topLeft,
+                        child: Text(
+                          song.artistName,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: Colors.white,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 }
