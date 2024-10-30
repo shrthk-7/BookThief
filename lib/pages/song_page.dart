@@ -15,7 +15,6 @@ class SongPage extends StatefulWidget {
 class _SongPageState extends State<SongPage> {
   late final dynamic playlistProvider;
 
-  bool isPlaying = false;
   int hour = 0;
   int minute = 0;
 
@@ -92,22 +91,13 @@ class _SongPageState extends State<SongPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Spacer(),
-                  // IconButton(
-                  //   onPressed: () {},
-                  //   icon: const Icon(
-                  //     Icons.arrow_back_rounded,
-                  //     size: 40,
-                  //   ),
-                  // ),
                   IconButton(
                     onPressed: () async {
-                      await HapticFeedback.heavyImpact();
-                      setState(() {
-                        isPlaying = !isPlaying;
-                      });
+                      await value.togglePausePlay();
+                      await HapticFeedback.lightImpact();
                     },
                     icon: Icon(
-                      isPlaying
+                      value.isPlaying
                           ? Icons.pause_circle_filled_outlined
                           : Icons.play_circle_filled_outlined,
                       size: 40,

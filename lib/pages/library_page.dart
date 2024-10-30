@@ -71,9 +71,11 @@ class _LibraryPageState extends State<LibraryPage> {
   }
 
   void goToSong(int songIndex) {
-    playlistProvider.currentSongIndex = songIndex;
+    playlistProvider.setCurrentPlayingIndex(songIndex);
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const SongPage()));
+      context,
+      MaterialPageRoute(builder: (context) => const SongPage()),
+    );
   }
 
   @override

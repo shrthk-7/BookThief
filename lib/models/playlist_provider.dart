@@ -1,9 +1,11 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:bookthief/models/song.dart';
 import 'package:flutter/material.dart';
 
 class PlaylistProvider extends ChangeNotifier {
   List<String> _paths = [];
   List<Song> _playlist = [];
+  final AudioPlayer player = AudioPlayer();
 
   int _currentPlaying = 0;
   bool _isPLaying = false;
@@ -14,18 +16,29 @@ class PlaylistProvider extends ChangeNotifier {
   bool get isPlaying => _isPLaying;
   Song get currentSong => _playlist[_currentPlaying];
 
-  set currentSongIndex(int songIndex) {
+  setCurrentPlayingIndex(int songIndex) async {
     _currentPlaying = songIndex;
+    await player.setSource(DeviceFileSource(_paths[songIndex]));
     notifyListeners();
   }
 
-  pauseSong() {
+  togglePausePlay() async {
+    if (_isPLaying) {
+      await pauseSong();
+    } else {
+      await playSong();
+    }
+  }
+
+  pauseSong() async {
     _isPLaying = false;
+    await player.pause();
     notifyListeners();
   }
 
-  playSong() {
+  playSong() async {
     _isPLaying = true;
+    await player.resume();
     notifyListeners();
   }
 
