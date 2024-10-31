@@ -6,22 +6,43 @@ import 'package:flutter/material.dart';
 class PlaylistProvider extends ChangeNotifier {
   List<String> _paths = [];
   List<Song> _playlist = [];
-  final AudioPlayer player = AudioPlayer();
-
+  final AudioPlayer _player = AudioPlayer();
   int _currentPlaying = 0;
   bool _isPLaying = false;
+
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
+
+  PlaylistProvider() {
+    _player.onDurationChanged.listen((duration) {
+      _duration = duration;
+      notifyListeners();
+    });
+
+    _player.onPositionChanged.listen((position) {
+      _position = position;
+      notifyListeners();
+    });
+
+    _player.onPlayerComplete.listen((event) {
+      _isPLaying = false;
+      _player.stop();
+    });
+  }
 
   List<Song> get playlist => _playlist;
   List<String> get paths => _paths;
   int get currentSongIndex => _currentPlaying;
   bool get isPlaying => _isPLaying;
   Song get currentSong => _playlist[_currentPlaying];
+  double get currentProgress =>
+      _position.inMilliseconds / _duration.inMilliseconds;
 
   setCurrentPlayingIndex(int songIndex) async {
     if (songIndex == _currentPlaying) return;
     _currentPlaying = songIndex;
     _isPLaying = false;
-    await player.setSource(DeviceFileSource(_paths[songIndex]));
+    await _player.setSource(DeviceFileSource(_paths[songIndex]));
     notifyListeners();
   }
 
@@ -35,13 +56,13 @@ class PlaylistProvider extends ChangeNotifier {
 
   pauseSong() async {
     _isPLaying = false;
-    await player.pause();
+    await _player.pause();
     notifyListeners();
   }
 
   playSong() async {
     _isPLaying = true;
-    await player.resume();
+    await _player.resume();
     notifyListeners();
   }
 

@@ -4,8 +4,11 @@ class SongDetails extends StatelessWidget {
   final String songName;
   final String artistName;
 
-  const SongDetails(
-      {super.key, required this.songName, required this.artistName});
+  const SongDetails({
+    super.key,
+    required this.songName,
+    required this.artistName,
+  });
 
   @override
   Widget build(BuildContext context) {

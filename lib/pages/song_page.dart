@@ -1,3 +1,4 @@
+import 'package:bookthief/components/progress_bar.dart';
 import 'package:bookthief/components/song_details.dart';
 import 'package:bookthief/models/playlist_provider.dart';
 import 'package:flutter/material.dart';
@@ -53,23 +54,7 @@ class _SongPageState extends State<SongPage> {
           child: Column(
             children: [
               const Spacer(),
-              Container(
-                height: 200,
-                width: 200,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomLeft,
-                    end: Alignment.topRight,
-                    colors: [
-                      Theme.of(context).colorScheme.primary,
-                      Theme.of(context).colorScheme.tertiary,
-                      Theme.of(context).colorScheme.secondary,
-                    ],
-                  ),
-                  boxShadow: kElevationToShadow[8],
-                ),
-              ),
+              MyProgressBar(completion: value.currentProgress),
               const Spacer(),
               SongDetails(
                 songName: value.currentSong.songName,
