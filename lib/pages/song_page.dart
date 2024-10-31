@@ -1,4 +1,3 @@
-import 'package:bookthief/components/position_picker.dart';
 import 'package:bookthief/components/song_details.dart';
 import 'package:bookthief/models/playlist_provider.dart';
 import 'package:flutter/material.dart';
@@ -54,82 +53,128 @@ class _SongPageState extends State<SongPage> {
           child: Column(
             children: [
               const Spacer(),
+              Container(
+                height: 200,
+                width: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.tertiary,
+                      Theme.of(context).colorScheme.secondary,
+                    ],
+                  ),
+                  boxShadow: kElevationToShadow[8],
+                ),
+              ),
+              const Spacer(),
               SongDetails(
                 songName: value.currentSong.songName,
                 artistName: value.currentSong.artistName,
               ),
               const Spacer(),
-              Container(
-                height: 300,
-                width: 300,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment.bottomLeft,
-                      end: Alignment.topRight,
-                      colors: [
-                        Theme.of(context).colorScheme.primary,
-                        Theme.of(context).colorScheme.tertiary,
-                        Theme.of(context).colorScheme.secondary,
-                      ],
-                    ),
-                    boxShadow: kElevationToShadow[12]),
-                child: Icon(
-                  Icons.circle,
-                  color: Theme.of(context).colorScheme.surface,
-                  size: 200,
-                ),
-              ),
-              const Spacer(),
-              const Divider(
-                indent: 30,
-                endIndent: 30,
-                // color: ,
-              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Spacer(),
                   IconButton(
-                    onPressed: () async {
-                      await value.togglePausePlay();
-                      await HapticFeedback.lightImpact();
-                    },
+                    onPressed: () async {},
                     icon: Icon(
-                      value.isPlaying
-                          ? Icons.pause_circle_filled_outlined
-                          : Icons.play_circle_filled_outlined,
+                      Icons.replay_10_rounded,
                       size: 40,
+                      color: Theme.of(context).colorScheme.inversePrimary,
                     ),
                   ),
-                  const Spacer(),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: kElevationToShadow[4],
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.tertiary,
+                          Theme.of(context).colorScheme.secondary,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: IconButton(
+                      onPressed: () async {
+                        await value.togglePausePlay();
+                        await HapticFeedback.lightImpact();
+                      },
+                      icon: Icon(
+                        value.isPlaying ? Icons.pause : Icons.play_arrow,
+                        size: 40,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 20,
+                  ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () async {},
                     icon: Icon(
-                      Icons.timelapse_outlined,
+                      Icons.forward_10_rounded,
                       size: 40,
+                      color: Theme.of(context).colorScheme.inversePrimary,
                     ),
                   ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.replay_outlined,
-                      size: 40,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.shuffle,
-                      size: 40,
-                    ),
-                  ),
-                  const Spacer(),
                 ],
               ),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   crossAxisAlignment: CrossAxisAlignment.center,
+              //   children: [
+              //     const Spacer(),
+              //     IconButton(
+              //       onPressed: () async {
+              //         await value.togglePausePlay();
+              //         await HapticFeedback.lightImpact();
+              //       },
+              //       icon: Icon(
+              //         value.isPlaying
+              //             ? Icons.pause_circle_filled_outlined
+              //             : Icons.play_circle_filled_outlined,
+              //         size: 40,
+              //       ),
+              //     ),
+              //     const Spacer(),
+              //     IconButton(
+              //       onPressed: () {},
+              //       icon: const Icon(
+              //         Icons.timelapse_outlined,
+              //         size: 40,
+              //       ),
+              //     ),
+              //     const Spacer(),
+              //     IconButton(
+              //       onPressed: () {},
+              //       icon: const Icon(
+              //         Icons.replay_outlined,
+              //         size: 40,
+              //       ),
+              //     ),
+              //     const Spacer(),
+              //     IconButton(
+              //       onPressed: () {},
+              //       icon: const Icon(
+              //         Icons.shuffle,
+              //         size: 40,
+              //       ),
+              //     ),
+              //     const Spacer(),
+              //   ],
+              // ),
               const Spacer()
               // const SizedBox(
               //   height: 30,
@@ -173,12 +218,12 @@ class _SongPageState extends State<SongPage> {
               //       ],
               //     ),
               //   if (!isPlaying)
-              //     PositionPicker(
-              //       hour: hour,
-              //       minute: minute,
-              //       onChangeHour: (value) => setState(() => hour = value),
-              //       onChangeMin: (value) => setState(() => minute = value),
-              //     ),
+              // PositionPicker(
+              //   hour: hour,
+              //   minute: minute,
+              //   onChangeHour: (value) => setState(() => hour = value),
+              //   onChangeMin: (value) => setState(() => minute = value),
+              // ),
               //   const Spacer(),
             ],
           ),

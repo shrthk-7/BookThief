@@ -28,6 +28,7 @@ class SongDetails extends StatelessWidget {
                   songName,
                   style: const TextStyle(
                     fontSize: 30,
+                    fontWeight: FontWeight.w900,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -35,20 +36,33 @@ class SongDetails extends StatelessWidget {
             ],
           ),
         ),
+        const SizedBox(
+          height: 10,
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Padding(
-              padding: EdgeInsets.only(right: 10),
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
               child: Icon(
                 Icons.person_2_outlined,
+                color: Theme.of(context)
+                    .colorScheme
+                    .inversePrimary
+                    .withOpacity(0.7),
               ),
             ),
             Flexible(
-              child: Text(artistName.toUpperCase()),
-            ),
-            const SizedBox(
-              height: 40,
+              child: Text(
+                artistName.toUpperCase(),
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .inversePrimary
+                      .withOpacity(0.7),
+                ),
+              ),
             ),
           ],
         ),
