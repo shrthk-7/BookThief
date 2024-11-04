@@ -1,4 +1,3 @@
-import 'package:bookthief/components/progress_bar.dart';
 import 'package:bookthief/components/song_details.dart';
 import 'package:bookthief/models/playlist_provider.dart';
 import 'package:flutter/material.dart';
@@ -87,8 +86,8 @@ class _SongPageState extends State<SongPage> {
                 ),
                 const Spacer(),
                 SongDetails(
-                  songName: value.currentSong.songName,
-                  artistName: value.currentSong.artistName,
+                  songName: value.currentSong?.songName ?? "Loading",
+                  artistName: value.currentSong?.artistName ?? "Loading",
                 ),
                 const Spacer(),
                 Slider(

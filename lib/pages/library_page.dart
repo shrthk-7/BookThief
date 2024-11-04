@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:bookthief/models/playlist_provider.dart';
 import 'package:bookthief/models/song.dart';
 import 'package:bookthief/pages/song_page.dart';
-import 'package:bookthief/preferences/shared_preferences_helper.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import "package:bookthief/components/my_drawer.dart";
@@ -15,9 +14,8 @@ class LibraryPage extends StatefulWidget {
   State<LibraryPage> createState() => _LibraryPageState();
 }
 
-class _LibraryPageState extends State<LibraryPage> {
+class _LibraryPageState extends State<LibraryPage> with WidgetsBindingObserver {
   late final PlaylistProvider playlistProvider;
-  final storageHelper = FileStorageHelper();
 
   Future<void> _pickAndSaveAudioFiles() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -33,12 +31,6 @@ class _LibraryPageState extends State<LibraryPage> {
     for (final String path in audioFilePaths) {
       await playlistProvider.addSongFromPath(path);
     }
-
-    await storageHelper.saveMusicFilesList(playlistProvider.playlist);
-  }
-
-  _loadAudioFilePaths() {
-    playlistProvider.setSongs(storageHelper.getMusicFilesList());
   }
 
   final List<Color> colors = const [
@@ -65,11 +57,27 @@ class _LibraryPageState extends State<LibraryPage> {
   void initState() {
     super.initState();
     playlistProvider = Provider.of<PlaylistProvider>(context, listen: false);
-    _loadAudioFilePaths();
+    WidgetsBinding.instance.addObserver(this);
   }
 
-  void goToSong(int songIndex) {
-    playlistProvider.setCurrentPlayingIndex(songIndex);
+  @override
+  void dispose() async {
+    WidgetsBinding.instance.removeObserver(this);
+    await playlistProvider.storePlaylist();
+    playlistProvider.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.detached) {
+      await playlistProvider.storePlaylist();
+      playlistProvider.dispose();
+    }
+  }
+
+  void goToSong(String songKey) {
+    playlistProvider.setCurrentPlayingIndex(songKey);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const SongPage()),
@@ -83,20 +91,22 @@ class _LibraryPageState extends State<LibraryPage> {
       appBar: AppBar(title: const Text("L I B R A R Y")),
       drawer: const MyDrawer(),
       floatingActionButton: Container(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.tertiary,
           shape: BoxShape.circle,
         ),
         child: IconButton(
           onPressed: _pickAndSaveAudioFiles,
-          icon: Icon(Icons.download_rounded),
+          icon: const Icon(Icons.download_rounded),
           color: Colors.white,
         ),
       ),
-      body: Consumer<PlaylistProvider>(
-        builder: (context, value, child) {
-          final List<Song> playlist = value.playlist;
+      body: Selector<PlaylistProvider, Map<String, Song>>(
+        selector: (context, value) => value.playlist,
+        builder: (context, playlistValue, child) {
+          final List<MapEntry<String, Song>> playlist =
+              playlistValue.entries.toList();
 
           return GridView.builder(
             padding: const EdgeInsets.all(20),
@@ -108,9 +118,11 @@ class _LibraryPageState extends State<LibraryPage> {
             ),
             itemCount: playlist.length,
             itemBuilder: (context, index) {
-              final Song song = playlist[index];
+              String key = playlist[index].key;
+              Song song = playlist[index].value;
+
               return InkWell(
-                onTap: () => goToSong(index),
+                onTap: () => goToSong(key),
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(

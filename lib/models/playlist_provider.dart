@@ -1,14 +1,16 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:audiotags/audiotags.dart';
 import 'package:bookthief/models/song.dart';
+import 'package:bookthief/preferences/shared_preferences_helper.dart';
 import 'package:flutter/material.dart';
 
 class PlaylistProvider extends ChangeNotifier {
-  List<Song> _playlist = [];
   final AudioPlayer _player = AudioPlayer();
-  int _currentPlaying = -1;
-  bool _isPLaying = false;
+  final FileStorageHelper storageHelper = FileStorageHelper();
 
+  Map<String, Song> _playlist = {};
+  String _currentPlayingKey = "";
+  bool _isPLaying = false;
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
 
@@ -27,6 +29,8 @@ class PlaylistProvider extends ChangeNotifier {
       _isPLaying = playerState == PlayerState.playing;
       notifyListeners();
     });
+
+    _playlist = storageHelper.getMusicFilesList();
   }
 
   @override
@@ -35,21 +39,25 @@ class PlaylistProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  List<Song> get playlist => _playlist;
-  int get currentSongIndex => _currentPlaying;
+  Map<String, Song> get playlist => _playlist;
   bool get isPlaying => _isPLaying;
-  Song get currentSong => _playlist[_currentPlaying];
+  Song? get currentSong => _playlist[_currentPlayingKey];
   double get currentProgress =>
       _position.inMilliseconds / _duration.inMilliseconds;
   Duration get position => _position;
   Duration get duration => _duration;
 
-  setCurrentPlayingIndex(int songIndex) async {
-    if (songIndex == _currentPlaying) return;
-    _currentPlaying = songIndex;
+  setCurrentPlayingIndex(String newPlayingKey) async {
+    if (newPlayingKey == _currentPlayingKey) return;
+    if (!(_playlist.containsKey(newPlayingKey))) throw Error();
+    updateLastPlayedPosition();
+
+    Song song = _playlist[newPlayingKey]!;
+    _currentPlayingKey = newPlayingKey;
     await _player.setSource(
-      DeviceFileSource(_playlist[_currentPlaying].audioPath),
+      DeviceFileSource(song.audioPath),
     );
+    await _player.seek(song.lastPlayedDuration);
     notifyListeners();
   }
 
@@ -66,7 +74,23 @@ class PlaylistProvider extends ChangeNotifier {
     }
   }
 
+  updateLastPlayedPosition() {
+    if (!(_playlist.containsKey(_currentPlayingKey))) {
+      return;
+    }
+
+    _playlist.update(_currentPlayingKey, (song) {
+      song.setLastPlayedDuration(_position);
+      return song;
+    });
+  }
+
+  storePlaylist() async {
+    await storageHelper.saveMusicFilesList(_playlist);
+  }
+
   pauseSong() async {
+    updateLastPlayedPosition();
     await _player.pause();
     notifyListeners();
   }
@@ -109,25 +133,24 @@ class PlaylistProvider extends ChangeNotifier {
     );
   }
 
-  setSongs(List<Song> songs) {
+  setSongs(Map<String, Song> songs) {
     _playlist = songs;
-    _currentPlaying = -1;
+    _currentPlayingKey = "";
     _player.stop();
     notifyListeners();
   }
 
-  addSong(Song song) {
-    if (_playlist.any(
-        (playlistSong) => playlistSong.audioPath == song.audioPath)) return;
-
-    _playlist.add(song);
+  addSong(Song song) async {
+    if (_playlist.containsKey(song.audioPath)) return;
+    _playlist[song.audioPath] = song;
     notifyListeners();
+    await storePlaylist();
   }
 
   addSongFromPath(String path) async {
-    if (_playlist.any((playlistSong) => playlistSong.audioPath == path)) return;
-
-    _playlist.add(await getSongFromPath(path));
+    if (_playlist.containsKey(path)) return;
+    _playlist[path] = await getSongFromPath(path);
     notifyListeners();
+    await storePlaylist();
   }
 }

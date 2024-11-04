@@ -18,20 +18,24 @@ class FileStorageHelper {
     _preferences ??= await SharedPreferences.getInstance();
   }
 
-  Future<void> saveMusicFilesList(List<Song> musicFiles) async {
-    List<String> jsonList =
-        musicFiles.map((file) => jsonEncode(file.toJson())).toList();
-    print(jsonList);
-    await _preferences?.setStringList(AUDIO_FILE_PATHS, jsonList);
+  Future<void> saveMusicFilesList(Map<String, Song> musicFiles) async {
+    String json = jsonEncode(
+      musicFiles.map((key, song) => MapEntry(key, song.toJson())),
+    );
+    await _preferences?.setString(AUDIO_FILE_PATHS, json);
   }
 
-  List<Song> getMusicFilesList() {
-    List<String>? jsonList = _preferences?.getStringList(AUDIO_FILE_PATHS);
-    if (jsonList == null) return [];
-    print({'jsonList': jsonList});
-    return jsonList
-        .map((jsonString) => Song.fromJson(jsonDecode(jsonString)))
-        .toList();
+  Map<String, Song> getMusicFilesList() {
+    String? json = _preferences?.getString(AUDIO_FILE_PATHS);
+    if (json == null) return {};
+
+    Map<String, dynamic> jsonMap = jsonDecode(json);
+    Map<String, Song> decodedSongMap = jsonMap.map(
+      (key, value) => MapEntry(key, Song.fromJson(value)),
+    );
+
+    print({'jsonList': decodedSongMap});
+    return decodedSongMap;
   }
 
   Future<void> clearFile(String key) async {

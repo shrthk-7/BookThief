@@ -3,7 +3,7 @@ class Song {
   final String artistName;
   final String albumArtImagePath;
   final String audioPath;
-  final Duration lastPlayedDuration;
+  Duration lastPlayedDuration;
 
   Song({
     required this.songName,
@@ -12,6 +12,10 @@ class Song {
     required this.audioPath,
     this.lastPlayedDuration = Duration.zero,
   });
+
+  setLastPlayedDuration(Duration duration) {
+    lastPlayedDuration = duration;
+  }
 
   Map<String, dynamic> toJson() => {
         'songName': songName,
