@@ -1,10 +1,14 @@
 import 'package:bookthief/models/playlist_provider.dart';
+import 'package:bookthief/preferences/shared_preferences_helper.dart';
 import 'package:bookthief/themes/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'pages/home_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FileStorageHelper.init();
+
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => ThemeProvider()),
     ChangeNotifierProvider(create: (context) => PlaylistProvider())

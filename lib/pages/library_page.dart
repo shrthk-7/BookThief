@@ -2,11 +2,11 @@ import 'dart:math';
 import 'package:bookthief/models/playlist_provider.dart';
 import 'package:bookthief/models/song.dart';
 import 'package:bookthief/pages/song_page.dart';
+import 'package:bookthief/preferences/shared_preferences_helper.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import "package:bookthief/components/my_drawer.dart";
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -16,7 +16,8 @@ class LibraryPage extends StatefulWidget {
 }
 
 class _LibraryPageState extends State<LibraryPage> {
-  late final dynamic playlistProvider;
+  late final PlaylistProvider playlistProvider;
+  final storageHelper = FileStorageHelper();
 
   Future<void> _pickAndSaveAudioFiles() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -30,17 +31,14 @@ class _LibraryPageState extends State<LibraryPage> {
         result.files.map((file) => file.path!).toList();
 
     for (final String path in audioFilePaths) {
-      playlistProvider.addPath(path);
+      await playlistProvider.addSongFromPath(path);
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('audioFilePaths', playlistProvider.paths);
+    await storageHelper.saveMusicFilesList(playlistProvider.playlist);
   }
 
-  Future<void> _loadAudioFilePaths() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedPaths = prefs.getStringList('audioFilePaths') ?? [];
-    playlistProvider.setPaths(savedPaths);
+  _loadAudioFilePaths() {
+    playlistProvider.setSongs(storageHelper.getMusicFilesList());
   }
 
   final List<Color> colors = const [

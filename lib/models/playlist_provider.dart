@@ -4,10 +4,9 @@ import 'package:bookthief/models/song.dart';
 import 'package:flutter/material.dart';
 
 class PlaylistProvider extends ChangeNotifier {
-  List<String> _paths = [];
   List<Song> _playlist = [];
   final AudioPlayer _player = AudioPlayer();
-  int _currentPlaying = 0;
+  int _currentPlaying = -1;
   bool _isPLaying = false;
 
   Duration _duration = Duration.zero;
@@ -24,29 +23,42 @@ class PlaylistProvider extends ChangeNotifier {
       notifyListeners();
     });
 
-    _player.onPlayerComplete.listen((event) {
-      _isPLaying = false;
-      _player.stop();
+    _player.onPlayerStateChanged.listen((playerState) {
+      _isPLaying = playerState == PlayerState.playing;
+      notifyListeners();
     });
   }
 
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
   List<Song> get playlist => _playlist;
-  List<String> get paths => _paths;
   int get currentSongIndex => _currentPlaying;
   bool get isPlaying => _isPLaying;
   Song get currentSong => _playlist[_currentPlaying];
   double get currentProgress =>
       _position.inMilliseconds / _duration.inMilliseconds;
+  Duration get position => _position;
+  Duration get duration => _duration;
 
   setCurrentPlayingIndex(int songIndex) async {
     if (songIndex == _currentPlaying) return;
     _currentPlaying = songIndex;
-    _isPLaying = false;
-    await _player.setSource(DeviceFileSource(_paths[songIndex]));
+    await _player.setSource(
+      DeviceFileSource(_playlist[_currentPlaying].audioPath),
+    );
     notifyListeners();
   }
 
   togglePausePlay() async {
+    if (_position == _duration) {
+      _position = Duration.zero;
+      _player.seek(Duration.zero);
+    }
+
     if (_isPLaying) {
       await pauseSong();
     } else {
@@ -55,14 +67,35 @@ class PlaylistProvider extends ChangeNotifier {
   }
 
   pauseSong() async {
-    _isPLaying = false;
     await _player.pause();
     notifyListeners();
   }
 
   playSong() async {
-    _isPLaying = true;
     await _player.resume();
+    notifyListeners();
+  }
+
+  seekSong(int seconds) async {
+    Duration newPosition = _position + Duration(seconds: seconds);
+    if (newPosition >= _duration) {
+      _isPLaying = false;
+      await _player.pause();
+      return await _player.seek(Duration.zero);
+    }
+
+    if (newPosition < Duration.zero) {
+      return await _player.seek(Duration.zero);
+    }
+
+    await _player.seek(newPosition);
+  }
+
+  setProgress(double progress) async {
+    Duration newPosition = Duration(
+      milliseconds: (_duration.inMilliseconds * progress).toInt(),
+    );
+    _player.seek(newPosition);
     notifyListeners();
   }
 
@@ -76,18 +109,24 @@ class PlaylistProvider extends ChangeNotifier {
     );
   }
 
-  setPaths(List<String> paths) async {
-    _paths = paths;
-    _playlist = [];
-    for (final String path in paths) {
-      _playlist.add(await getSongFromPath(path));
-    }
+  setSongs(List<Song> songs) {
+    _playlist = songs;
+    _currentPlaying = -1;
+    _player.stop();
     notifyListeners();
   }
 
-  addPath(String path) async {
-    if (_paths.contains(path)) return;
-    _paths.add(path);
+  addSong(Song song) {
+    if (_playlist.any(
+        (playlistSong) => playlistSong.audioPath == song.audioPath)) return;
+
+    _playlist.add(song);
+    notifyListeners();
+  }
+
+  addSongFromPath(String path) async {
+    if (_playlist.any((playlistSong) => playlistSong.audioPath == path)) return;
+
     _playlist.add(await getSongFromPath(path));
     notifyListeners();
   }
